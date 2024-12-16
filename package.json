@@ -1,0 +1,72 @@
+{
+  "name": "sensibleextensions",
+  "displayName": "Sensible Extensions",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [    
+      {
+        "command": "sensibleextensions.moveselectiontofile",
+        "title": "Move selection to file"
+      },
+      {
+        "command": "sensibleextensions.createterraformproject",
+        "title": "New Terraform Project"
+      }
+    ],
+    "menus" : {
+      "sensibleextensions.refactoring":[
+        {"command":"sensibleextensions.moveselectiontofile","group":"navigation","when":"editorTextFocus"}
+      ],
+      "sensibleextensions.templates":[
+        {"submenu":"sensibleextensions.templatesterraform","group":"inine"},
+        {"submenu":"sensibleextensions.templatesangular","group":"inine"}
+      ],      
+      "sensibleextensions.templatesterraform":[
+        {"command":"sensibleextensions.createterraformproject","group":"inline"}
+      ], 
+      "sensibleextensions.templatesangular":[
+        {"command":"sensibleextensions.createterraformproject","group":"inline"}
+      ],
+      "explorer/context" : [
+        {"submenu":"sensibleextensions.templates","group":"inine"}
+      ],
+      "editor/context" : [
+        {"submenu":"sensibleextensions.refactoring","group":"inine","when":"editorHasSelection"}
+      ]
+    },
+    "submenus":[     
+      { "id":"sensibleextensions.refactoring", "label":"Refactoring"},
+      { "id":"sensibleextensions.templates", "label":"Templates"},
+      { "id":"sensibleextensions.templatesterraform", "label":"Terraform"},
+      { "id":"sensibleextensions.templatesangular", "label":"Angular"}
+    ]  
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^9.16.0",
+    "typescript": "^5.7.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
