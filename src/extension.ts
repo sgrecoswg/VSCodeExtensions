@@ -1,27 +1,16 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { readFileSync, readdirSync, lstatSync } from 'fs';
+import { join } from 'path';
+import { readFileSync, readdirSync, lstatSync, cpSync,statSync } from 'fs';
 import { mkdir, writeFile, readFile, readdir, lstat} from 'fs/promises';
+
+// This method is called when your extension is deactivated
+export function deactivate() {}
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// // Use the console to output diagnostic information (console.log) and errors (console.error)
-	// // This line of code will only be executed once when your extension is activated
-	// console.log('Congratulations, your extension "sensibleextensions" is now active!');
-
-	// // The command has been defined in the package.json file
-	// // Now provide the implementation of the command with registerCommand
-	// // The commandId parameter must match the command field in package.json
-	// const disposable = vscode.commands.registerCommand('sensibleextensions.helloWorld', () => {
-	// 	// The code you place here will be executed every time your command is executed
-	// 	// Display a message box to the user
-	// 	vscode.window.showInformationMessage('Hello World from SensibleExtensions!');
-	// });
-
-	// context.subscriptions.push(disposable);
+export function activate(context: vscode.ExtensionContext) {	
 
 	const _moveselectiontofiledisposable = vscode.commands.registerCommand('sensibleextensions.moveselectiontofile',async (c) => {
 		
@@ -73,8 +62,19 @@ export function activate(context: vscode.ExtensionContext) {
 			let _templateFolder = readdirSync(_fullPath);
 			_templateFolder.forEach((x)=>{
 				createFromTemplate(_fullPath,x,_fPath,_name,_projectData);
-				vscode.window.showInformationMessage(`${_name} created.`);	
-			});
+			});	
+
+			// Directory to start from
+			const searchValue = [
+				{search:'|organization|',value:_projectData.organization},
+				{search:'|workspaceprefix|',value:_projectData.workspaceprefix}
+			];
+			const _newFiles = getAllFiles(_fPath);
+			_newFiles.forEach((file:string) => {				
+				replaceTexts(file, searchValue);				
+			});	
+
+			vscode.window.showInformationMessage(`${_name} created.`);	
 		} catch (error:any) {
 			vscode.window.showErrorMessage(error.message);
 		}
@@ -87,19 +87,12 @@ export function activate(context: vscode.ExtensionContext) {
 function createFromTemplate(templatePath:string,fileName:string,path:string,moduleName:string,data:any){
 
 	let _currentEntry = `${templatePath}/${fileName}`;
-	if (lstatSync(_currentEntry).isDirectory()) {
-		let _subItem = readdirSync(_currentEntry);
-		if (_subItem.length >0) {
-			mkdir(`${path}/${moduleName}`);
-			_subItem.forEach((y)=>{
-				const _content = readFileSync(`${path}/${fileName}/${y}`,'utf-8');
-
-				let _replacedText = _content.replaceAll('|organization|',data.organization);
-				_replacedText = _content.replaceAll('|workspaceprefix|',data.workspaceprefix);
-
-				writeFile(`${path}/${fileName}/${y.replace('.txt','')}`,_replacedText);
-			});
-		}
+	if (lstatSync(_currentEntry).isDirectory()) {		
+		 let _subItem = readdirSync(_currentEntry);
+		 if (_subItem.length >0) {
+			const _destination = `${path}/${fileName}`;				
+			cpSync(_currentEntry, _destination, { recursive: true });		 	
+		 }
 	} else {
 		const _content = readFileSync(_currentEntry,'utf-8');
 		const _replacedText = _content.replaceAll('|templateLower|',moduleName.toLowerCase());
@@ -107,6 +100,40 @@ function createFromTemplate(templatePath:string,fileName:string,path:string,modu
 	}
 }
 
+function getAllFiles(dirPath:string):string[] {
+	const files = readdirSync(dirPath);
+	let result:string[] = [];
+  
+	files.forEach((file) => {
+	  const filePath = join(dirPath, file);
+	  const stat = statSync(filePath);
+  
+	  if (stat.isDirectory()) {
+		result = result.concat(getAllFiles(filePath));
+	  } else {
+		result.push(filePath);
+	  }
+	});
+  
+	return result;
+  }
+  
+const replaceText = async (filePath:string, from:string, to:string) => {
+	const fileContent = await readFile(filePath, 'utf8');
+	const replacedContent = fileContent.replaceAll(from, to);
+	await writeFile(filePath, replacedContent, 'utf8');
+  };
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+  const replaceTexts = async (filePath:string, replacements:any[]) => {
+	let replacedContent = await readFile(filePath, 'utf8');	
+	if(replacedContent.length > 0){	
+		if(replacements.some(x=> replacedContent.includes(x.search))){
+			replacements.forEach((entry:any) => {
+				replacedContent = replacedContent.replaceAll(entry.search, entry.value);
+			});			
+			await writeFile(filePath, replacedContent, 'utf8');
+		}	
+	}	
+  };
+
+
