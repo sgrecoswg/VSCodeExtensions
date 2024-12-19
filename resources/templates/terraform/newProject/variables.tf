@@ -1,5 +1,6 @@
-variable "var_name" {
-    description = ""
-    type  = string
-    default = ""
+
+variable "app_env" {
+  description = "environment we are deploying to"
+  type        = string
+  default     = "notset"
 }
