@@ -10,14 +10,13 @@ variable "app-env" {
   default     = "notset"
 }
 
-variable "region" {
-  description = "region we are deploying to"
-  type        = string
-  default     = "notset"
-}
-
 variable "app-name" {
   description = "The name of the app"
   type        = string
   default     = "notset"
+}
+
+variable "region" {
+  description = "region for environment"
+  type        = map(any)
 }

@@ -9,3 +9,20 @@ variable "app-env" {
   type        = string
   default     = "notset"
 }
+
+variable "app-name" {
+  description = "environment we are deploying to"
+  type        = string
+  default     = "notset"
+}
+
+variable "rg-name" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+variable "rg-location" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}

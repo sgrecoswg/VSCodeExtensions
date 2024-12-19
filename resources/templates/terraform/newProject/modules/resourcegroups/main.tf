@@ -1,7 +1,7 @@
-resource "azurerm_resource_group" "sample-rg" {
+resource "azurerm_resource_group" "rg" {
   count = var.should-deploy ? 1 : 0
-  name     = "sample-resource-${var.app-env}"
-  location = "East Us"
+  name     = "rg-${var.app-name}-${var.app-env}-${var.region}"
+  location = var.region
   tags = {
     environment = "${var.app-env}"
   }

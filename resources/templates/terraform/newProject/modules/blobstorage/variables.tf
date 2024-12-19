@@ -9,3 +9,33 @@ variable "app-env" {
   type        = string
   default     = "notset"
 }
+
+variable "region" {
+  description = "region we are deploying to"
+  type        = string
+  default     = "notset"
+}
+
+variable "app-name" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "rg-name" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "sa-name" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "storageaccountid" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
