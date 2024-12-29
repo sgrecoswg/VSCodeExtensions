@@ -1,14 +1,13 @@
-
 module "resourcegroups" {
- source = "./modules/resourcegroups"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
- app-name      = var.app-name
- region        = var.region.location
+  source        = "./resourcegroups"
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  region        = var.region.location
 }
 
-module "datastorage" {
- source = "./modules/datastorage"
+module "storageaccount" {
+  source        = "./datastorage"
   depends_on    = [module.resourcegroups]
   rg-name       = module.resourcegroups.name
   rg-location   = module.resourcegroups.location
@@ -20,19 +19,19 @@ module "datastorage" {
 
 module "blobstorage" {
   source        = "./blobstorage"
-  depends_on    =[module.datastorage]
+  depends_on    =[module.storageaccount]
   should-deploy = var.should-deploy
   app-env       = var.app-env
   app-name      = var.app-name
   region        = var.region.location
-  rg-name   = module.resourcegroups.name
-  sa-name  = module.datastorage.name
-  storageaccountid = module.datastorage.accountid
+  rg-name       = module.resourcegroups.name
+  sa-name       = module.storageaccount.name
+  storageaccountid = module.storageaccount.accountid
 }
 
 module "managedidentity" {
   source        = "./managedidentity"
-  depends_on    = [module.storageaccount]
+  depends_on    = [module.resourcegroups]
   should-deploy = var.should-deploy
   app-env       = var.app-env
   app-name      = var.app-name
@@ -41,46 +40,51 @@ module "managedidentity" {
 }
 
 module "rediscache" {
- source = "./modules/rediscache"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
-}
-
-
-
-module "loganalytics" {
- source = "./modules/loganalytics"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
+  source        = "./rediscache"
+  depends_on    = [module.resourcegroups]
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  rg-location   = module.resourcegroups.location
+  rg-name       = module.resourcegroups.name
 }
 
 module "keyvault" {
- source = "./modules/keyvault"
- depends_on    =[module.resourcegroups]
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
-}
-
-module "gsloadbalancer" {
- source = "./modules/gsloadbalancer"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
-}
-
-module "appservice" {
- source = "./modules/appservice"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
+  source        = "./keyvault"
+  depends_on    = [module.resourcegroups,module.managedidentity]
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  rg-location   = module.resourcegroups.location
+  rg-name       = module.resourcegroups.name
+  tenant-id     = data.azurerm_client_config.current.tenant_id
+  object-id     = data.azurerm_client_config.current.object_id
+  key_ops = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+  sku_name = "standard"
 }
 
 module "appinsights" {
- source = "./modules/appinsights"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
+  source        = "./appinsights"
+  depends_on    = [module.resourcegroups]
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  rg-location   = module.resourcegroups.location
+  rg-name       = module.resourcegroups.name  
 }
 
 module "appgateway" {
- source = "./modules/appgateway"
- should-deploy = var.should-deploy
- app-env = local.app_metadata.app_env
+  source        = "./appgateway"
+  depends_on    = [module.resourcegroups]
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  rg-location   = module.resourcegroups.location
+  rg-name       = module.resourcegroups.name  
+  region        = module.resourcegroups.location
+  virtual-network-ip-set = var.virtual-network-ip-set
+  virtual-subnet-ip-set = var.virtual-subnet-ip-set
+  virtual-failover-subnet-ip-set = var.virtual-failover-subnet-ip-set
+  gw-path = var.gw-path 
 }
+
