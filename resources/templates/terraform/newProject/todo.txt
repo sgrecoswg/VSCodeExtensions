@@ -1,0 +1,8 @@
+run az account show
+
+set the following in terraform in your variables
+
+ARM_CLIENT_ID = "<APPID_VALUE>"  the app id that comes bac from your logged in account in azure
+ARM_CLIENT_SECRET = "<PASSWORD_VALUE>"  the password that comes bac from your logged in account in azure
+ARM_SUBSCRIPTION_ID = "<SUBSCRIPTION_ID>"  the subscription id that comes bac from your logged in account in azure
+ARM_TENANT_ID = "<TENANT_VALUE>"  the tenant id that comes bac from your logged in account in azure

@@ -33,28 +33,19 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.activate = activate;
 exports.deactivate = deactivate;
+exports.activate = activate;
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(require("vscode"));
+const path_1 = require("path");
 const fs_1 = require("fs");
 const promises_1 = require("fs/promises");
+// This method is called when your extension is deactivated
+function deactivate() { }
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
-    // // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // // This line of code will only be executed once when your extension is activated
-    // console.log('Congratulations, your extension "sensibleextensions" is now active!');
-    // // The command has been defined in the package.json file
-    // // Now provide the implementation of the command with registerCommand
-    // // The commandId parameter must match the command field in package.json
-    // const disposable = vscode.commands.registerCommand('sensibleextensions.helloWorld', () => {
-    // 	// The code you place here will be executed every time your command is executed
-    // 	// Display a message box to the user
-    // 	vscode.window.showInformationMessage('Hello World from SensibleExtensions!');
-    // });
-    // context.subscriptions.push(disposable);
     const _moveselectiontofiledisposable = vscode.commands.registerCommand('sensibleextensions.moveselectiontofile', async (c) => {
         const _workspace = vscode.window;
         if (!_workspace.activeTextEditor) {
@@ -99,8 +90,17 @@ function activate(context) {
             let _templateFolder = (0, fs_1.readdirSync)(_fullPath);
             _templateFolder.forEach((x) => {
                 createFromTemplate(_fullPath, x, _fPath, _name, _projectData);
-                vscode.window.showInformationMessage(`${_name} created.`);
             });
+            // Directory to start from
+            const searchValue = [
+                { search: '|organization|', value: _projectData.organization },
+                { search: '|workspaceprefix|', value: _projectData.workspaceprefix }
+            ];
+            const _newFiles = getAllFiles(_fPath);
+            _newFiles.forEach((file) => {
+                replaceTexts(file, searchValue);
+            });
+            vscode.window.showInformationMessage(`${_name} created.`);
         }
         catch (error) {
             vscode.window.showErrorMessage(error.message);
@@ -113,13 +113,8 @@ function createFromTemplate(templatePath, fileName, path, moduleName, data) {
     if ((0, fs_1.lstatSync)(_currentEntry).isDirectory()) {
         let _subItem = (0, fs_1.readdirSync)(_currentEntry);
         if (_subItem.length > 0) {
-            (0, promises_1.mkdir)(`${path}/${moduleName}`);
-            _subItem.forEach((y) => {
-                const _content = (0, fs_1.readFileSync)(`${path}/${fileName}/${y}`, 'utf-8');
-                let _replacedText = _content.replaceAll('|organization|', data.organization);
-                _replacedText = _content.replaceAll('|workspaceprefix|', data.workspaceprefix);
-                (0, promises_1.writeFile)(`${path}/${fileName}/${y.replace('.txt', '')}`, _replacedText);
-            });
+            const _destination = `${path}/${fileName}`;
+            (0, fs_1.cpSync)(_currentEntry, _destination, { recursive: true });
         }
     }
     else {
@@ -128,6 +123,35 @@ function createFromTemplate(templatePath, fileName, path, moduleName, data) {
         (0, promises_1.writeFile)(`${path}/${fileName.replaceAll("template", moduleName).replace('.txt', '')}`, _replacedText);
     }
 }
-// This method is called when your extension is deactivated
-function deactivate() { }
+function getAllFiles(dirPath) {
+    const files = (0, fs_1.readdirSync)(dirPath);
+    let result = [];
+    files.forEach((file) => {
+        const filePath = (0, path_1.join)(dirPath, file);
+        const stat = (0, fs_1.statSync)(filePath);
+        if (stat.isDirectory()) {
+            result = result.concat(getAllFiles(filePath));
+        }
+        else {
+            result.push(filePath);
+        }
+    });
+    return result;
+}
+const replaceText = async (filePath, from, to) => {
+    const fileContent = await (0, promises_1.readFile)(filePath, 'utf8');
+    const replacedContent = fileContent.replaceAll(from, to);
+    await (0, promises_1.writeFile)(filePath, replacedContent, 'utf8');
+};
+const replaceTexts = async (filePath, replacements) => {
+    let replacedContent = await (0, promises_1.readFile)(filePath, 'utf8');
+    if (replacedContent.length > 0) {
+        if (replacements.some(x => replacedContent.includes(x.search))) {
+            replacements.forEach((entry) => {
+                replacedContent = replacedContent.replaceAll(entry.search, entry.value);
+            });
+            await (0, promises_1.writeFile)(filePath, replacedContent, 'utf8');
+        }
+    }
+};
 //# sourceMappingURL=extension.js.map
