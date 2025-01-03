@@ -1,3 +1,5 @@
+login to azure
+
 run az account show
 
 set the following in terraform in your variables

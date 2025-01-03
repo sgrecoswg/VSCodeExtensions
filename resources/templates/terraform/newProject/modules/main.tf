@@ -88,3 +88,28 @@ module "appgateway" {
   gw-path = var.gw-path 
 }
 
+
+module "appservice" {
+  source        = "./appservice"
+  depends_on    = [module.resourcegroups]
+  should-deploy = var.should-deploy
+  app-env       = var.app-env
+  app-name      = var.app-name
+  rg-location   = module.resourcegroups.location
+  rg-name       = module.resourcegroups.name  
+  region        = module.resourcegroups.location     
+  dotnet-framework = var.dotnet-framework
+  source-control = var.source-control
+  connection-string = {
+    name  = var.connection-string.name
+    type  = var.connection-string.type
+    value = var.connection-string.value
+  }  
+  app-settings = {
+    "SOME_KEY" = "some-value"
+  }
+  sku= var.sku
+  os = var.os
+}
+
+

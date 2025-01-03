@@ -33,3 +33,9 @@ output "gateway" {
   sensitive   = false #true if you want to hide this from the outputs in the apply
   value       = module.appgateway
 }
+
+# output "appservices" {
+#   description = ""
+#   sensitive   = true #true if you want to hide this from the outputs in the apply
+#   value       = module.appservice
+# }

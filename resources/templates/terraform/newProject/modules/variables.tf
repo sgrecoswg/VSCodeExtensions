@@ -46,3 +46,33 @@ variable "gw-path" {
   description = "The name of the app"
   type        = string
 }
+
+variable "sku" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "os" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "connection-string" {
+   description = "The name of the app"
+   type        = any
+   default     = {}   
+}
+
+variable "dotnet-framework" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
+
+variable "source-control" {
+  description = "The name of the app"
+  type        = string
+  default     = "notset"
+}
