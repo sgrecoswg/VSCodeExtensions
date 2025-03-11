@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
       - name: Run PowerShell script
         shell: pwsh
         run: |
@@ -18,6 +20,8 @@ jobs:
           $branchName = $env:GITHUB_REF -replace 'refs/heads/',''
           echo "Commit SHA: $commitSha"
           echo "Branch Name: $branchName"
+          $dif = git diff-tree --no-commit-id --name-only -r $commitSha
+          echo $dif
 
 
       
