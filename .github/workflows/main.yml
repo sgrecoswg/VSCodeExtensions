@@ -13,7 +13,7 @@ jobs:
       - name: Checkout     
         shell: pwsh
         run: |
-          $commits = git log -s --pretty=format:"%H"
+          $commits = git log -2 --pretty=format:"%H"
           $commitArray = $commits -split "`n"
           $latestCommit = #commitArrays[0]
           $previousCommit = #commitArrays[1]
