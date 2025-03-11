@@ -10,11 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout     
+      - uses: actions/checkout@v2
+      - name: Run PowerShell script
         shell: pwsh
         run: |
-          $commitHash = (git rev-parse HEAD).Trim()
-          Write-Output $commitHash
+          $commitSha = $env:GITHUB_SHA
+          $branchName = $env:GITHUB_REF -replace 'refs/heads/',''
+          echo "Commit SHA: $commitSha"
+          echo "Branch Name: $branchName"
 
 
       
