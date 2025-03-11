@@ -13,14 +13,11 @@ jobs:
       - name: Checkout     
         shell: pwsh
         run: |
-          $commits = git log -2 --pretty=format:"%H"
-          $commitArray = $commits -split "`n"
-          $latestCommit = #commitArrays[0]
-          $previousCommit = #commitArrays[1]
-          $dif = git diff $previousCommit $latestCommit
+          $commitHash = (git rev-parse HEAD).Trim()
+          Write-Output $commitHash
 
-          Write-Output "Diffs between $latestCommit and  $previousCommit"
-          Write-Output $diffs
+
+      
 
           
         
