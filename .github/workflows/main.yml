@@ -1,0 +1,28 @@
+name: Integration file
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout     
+        shell: pwsh
+        run: |
+          $commits = git log -s --pretty=format:"%H"
+          $commitArray = $commits -split "`n"
+          $latestCommit = #commitArrays[0]
+          $previousCommit = #commitArrays[1]
+          $dif = git diff $previousCommit $latestCommit
+
+          Write-Output "Diffs between $latestCommit and  $previousCommit"
+          Write-Output $diffs
+
+          
+        
+        
+        
